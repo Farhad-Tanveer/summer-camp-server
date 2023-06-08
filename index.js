@@ -6,6 +6,7 @@ const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
 const jwt = require("jsonwebtoken");
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { query } = require("express");
 
 // middleware
 app.use(cors());
@@ -50,6 +51,7 @@ async function run() {
     const classCollection = client.db("summerCamp").collection("class");
     const usersCollection = client.db("summerCamp").collection("users");
     const cartCollection = client.db("summerCamp").collection("carts");
+    const paymentCollection = client.db("summerCamp").collection("payments");
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -165,6 +167,11 @@ async function run() {
       });
     });
 
+    app.post("/payments", async (req, res) => {
+      const payment = req.body;
+      const result = await paymentCollection.insertOne(payment);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
