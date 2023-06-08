@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
@@ -29,6 +30,14 @@ async function run() {
     const usersCollection = client.db("summerCamp").collection("users");
     const cartCollection = client.db("summerCamp").collection("carts");
 
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "2h",
+      });
+      res.send({ token });
+    });
+
     app.get("/class", async (req, res) => {
       const result = await classCollection
         .find()
@@ -54,7 +63,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("users/admin/:id", async (req, res) => {
+    app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -66,7 +75,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("users/instructor/:id", async (req, res) => {
+    app.patch("/users/instructor/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
