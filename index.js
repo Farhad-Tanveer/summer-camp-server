@@ -10,25 +10,25 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 app.use(cors());
 app.use(express.json());
 
-const verifyJWT = (req, res, next) => {
-  const authorization = req.header.authorization;
-  if (!authorization) {
-    return res
-      .status(401)
-      .send({ error: true, message: "unauthorized access" });
-  }
-  const token = authorization.split(" ")[1];
+// const verifyJWT = (req, res, next) => {
+//   const authorization = req.header.authorization;
+//   if (!authorization) {
+//     return res
+//       .status(401)
+//       .send({ error: true, message: "unauthorized access" });
+//   }
+//   const token = authorization.split(" ")[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res
-        .status(401)
-        .send({ error: true, message: "unauthorized access" });
-    }
-    req.decoded = decoded;
-    next();
-  });
-};
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//     if (err) {
+//       return res
+//         .status(401)
+//         .send({ error: true, message: "unauthorized access" });
+//     }
+//     req.decoded = decoded;
+//     next();
+//   });
+// };
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.id406pi.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -84,11 +84,8 @@ async function run() {
     });
 
     // admin
-    app.get("/users/admin/:email", verifyJWT, async (req, res) => {
+    app.get("/users/admin/:email", async (req, res) => {
       const email = req.params.email;
-      if (req.decoded.email !== email) {
-        res.send({ admin: false });
-      }
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       const result = { admin: user?.role === "admin" };
@@ -108,6 +105,13 @@ async function run() {
     });
 
     // instructor
+    app.get("/users/instructor/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.role === "instructor" };
+      res.send(result);
+    });
     app.patch("/users/instructor/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -122,7 +126,7 @@ async function run() {
 
     // cart collection
 
-    app.get("/carts", verifyJWT, async (req, res) => {
+    app.get("/carts", async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
