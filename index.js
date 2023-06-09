@@ -73,6 +73,15 @@ async function run() {
         .toArray();
       res.send(result);
     });
+    app.get("/classes", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+      const query = { instructorEmail: email };
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
 
     app.post("/class", async (req, res) => {
       const newClass = req.body;
@@ -118,12 +127,23 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/class/admin/:id", async (req, res) => {
+    app.patch("/class/approve/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           status: "approved",
+        },
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+    app.patch("/class/deny/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "denied",
         },
       };
       const result = await classCollection.updateOne(filter, updateDoc);
@@ -170,6 +190,7 @@ async function run() {
       res.send(result);
     });
 
+    // cart
     app.post("/carts", async (req, res) => {
       const item = req.body;
       //   console.log(item);
