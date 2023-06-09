@@ -65,11 +65,18 @@ async function run() {
     //   res.send({ token });
     // });
 
+    // classes
     app.get("/class", async (req, res) => {
       const result = await classCollection
         .find()
         .sort({ availableSeats: -1 })
         .toArray();
+      res.send(result);
+    });
+
+    app.post("/class", async (req, res) => {
+      const newClass = req.body;
+      const result = await classCollection.insertOne(newClass);
       res.send(result);
     });
 
