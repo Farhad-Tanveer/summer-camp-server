@@ -6,10 +6,14 @@ const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
 const jwt = require("jsonwebtoken");
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const { query } = require("express");
 
 // middleware
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  credentials: true,
+  optionSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // const verifyJWT = (req, res, next) => {
@@ -53,13 +57,13 @@ async function run() {
     const cartCollection = client.db("summerCamp").collection("carts");
     const paymentCollection = client.db("summerCamp").collection("payments");
 
-    app.post("/jwt", (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "2h",
-      });
-      res.send({ token });
-    });
+    // app.post("/jwt", (req, res) => {
+    //   const user = req.body;
+    //   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    //     expiresIn: "2h",
+    //   });
+    //   res.send({ token });
+    // });
 
     app.get("/class", async (req, res) => {
       const result = await classCollection
@@ -124,6 +128,14 @@ async function run() {
         },
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.get("/instructors", async (req, res) => {
+      const result = await usersCollection
+        .find({ role: "instructor" })
+        .sort({ role: 1 })
+        .toArray();
       res.send(result);
     });
 
