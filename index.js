@@ -241,8 +241,13 @@ async function run() {
 
     app.post("/payments", async (req, res) => {
       const payment = req.body;
-      const result = await paymentCollection.insertOne(payment);
-      res.send(result);
+      const insertResult = await paymentCollection.insertOne(payment);
+
+      // for delete specific item
+      const query = { _id: new ObjectId(payment.cartItem) };
+      const deleteResult = await cartCollection.deleteOne(query);
+
+      res.send({ insertResult, deleteResult });
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
