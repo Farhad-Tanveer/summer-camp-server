@@ -97,15 +97,17 @@ async function run() {
       res.send(result);
     });
 
-    // app.patch("/updateClass/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) };
-    //   const updateDoc = {
-    //     $inc: { availableSeats: -1, enrolled: 1 },
-    //   };
-    //   const result = await classCollection.updateOne(filter, updateDoc);
-    //   res.send(result);
-    // });
+    // working here now
+    app.patch("/updateClass/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $inc: { availableSeats: -1, enrolled: 1 },
+      };
+
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
     app.post("/class", async (req, res) => {
       const newClass = req.body;
